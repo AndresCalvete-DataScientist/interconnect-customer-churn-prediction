@@ -7,7 +7,8 @@ from functions import categoric_to_numeric_bool
 # Esto es para agregar al path la ruta de ejecución actual y poder importar respecto a la ruta del proyecto, desde donde se debe ejecutar el código
 sys.path.append(os.getcwd())
 
-# Loading data ----------------------------------------
+
+# 1. Loading data ----------------------------------------
 
 # Leemos los datos de información de contratos
 df_contract = pd.read_csv('files/datasets/input/contract.csv')
@@ -18,7 +19,8 @@ df_internet = pd.read_csv('files/datasets/input/internet.csv')
 # Leemos los datos de los servicios telefónicos
 df_phone = pd.read_csv('files/datasets/input/phone.csv')
 
-# Cleaning columns ----------------------------------------
+
+# 2. Cleaning columns ----------------------------------------
 
 
 def clean_columns_contract(dataset):
@@ -78,15 +80,82 @@ df_personal = clean_columns_personal(df_personal)
 df_internet = clean_columns_internet(df_internet)
 df_phone = clean_columns_phone(df_phone)
 
-# Eliminating duplicates per period ----------------------------------------
 
-# ...
+# 3. Feature engineering and joins ----------------------------------------
 
-# Checking NAs ----------------------------------------
 
-# ...
+def create_begin_year_month_column(dataset):
+    # Extraemos el año y mes de la fecha de subscripción
+    dataset['BeginYear'] = [x.year for x in dataset['BeginDate']]
+    dataset['BeginMonth'] = [x.month for x in dataset['BeginDate']]
 
-# Guardar datos ----------------------------------------
+    return dataset
+
+
+# Creamos las columnas de año y mes de inscripción
+df_contract = create_begin_year_month_column(df_contract)
+
+# Configuramos una tabla con todos los servicios
+df_con_int = df_contract.merge(df_internet, how='left', on='customerID')
+df_con_int_pho = df_con_int.merge(df_phone, how='left', on='customerID')
+
+# Resumir la columna MultipleLines en una nueva columna booleana HasPhone
+df_con_int_pho['HasPhone'] = [1 if pd.notnull(
+    x) else 0 for x in df_con_int_pho['MultipleLines']]
+
+# Crear una nueva columna que cuente la cantidad de servicios activos por cliente
+all_service_columns = ['OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
+                       'TechSupport', 'StreamingTV', 'StreamingMovies', 'HasInternet', 'HasPhone']
+df_con_int_pho['AllServicesCount'] = df_con_int_pho[all_service_columns].sum(
+    axis=1).astype(int)
+
+# Selección de características y objetivos
+data = pd.concat(
+    [
+        df_contract[[
+            'customerID',
+            'BeginYear',
+            'BeginMonth',
+            'Type',
+            'PaperlessBilling',
+            'PaymentMethod',
+            'MonthlyCharges',
+            'TotalCharges',
+        ]],
+        df_personal[[
+            'SeniorCitizen',
+            'Partner',
+            'Dependents'
+        ]],
+        df_con_int_pho[[
+            'InternetService',
+            'OnlineSecurity',
+            'OnlineBackup',
+            'DeviceProtection',
+            'TechSupport',
+            'AllServicesCount'
+        ]],
+        df_contract[[
+            'IsChurn'
+        ]]
+    ],
+    axis=1
+)
+
+
+# 4. Checking NAs ----------------------------------------
+
+# Reemplazamos los nulos de InternetService con 'No'
+data['InternetService'] = data['InternetService'].fillna('No')
+
+# Reemplazamos los nulos de los servicios con 0 significando que no se posee el servicio
+data['OnlineSecurity'] = data['OnlineSecurity'].fillna(0)
+data['OnlineBackup'] = data['OnlineBackup'].fillna(0)
+data['DeviceProtection'] = data['DeviceProtection'].fillna(0)
+data['TechSupport'] = data['TechSupport'].fillna(0)
+
+
+# 5. Saving data ----------------------------------------
 
 df_contract.to_csv(
     "files/datasets/intermediate/a01_contract_cleaned.csv", index=False)
@@ -96,3 +165,5 @@ df_internet.to_csv(
     "files/datasets/intermediate/a01_internet_cleaned.csv", index=False)
 df_phone.to_csv(
     "files/datasets/intermediate/a01_phone_cleaned.csv", index=False)
+data.to_csv(
+    "files/datasets/intermediate/a01_data_cleaned.csv", index=False)
