@@ -1,59 +1,36 @@
-# Librerias ----------------------------------------
+from preprocessing import a01_preprocessing, a02_encoding, a03_split_train_test
+from insights import b01_contracts_plots
 
-import params as params
-import os
-import sys
-import argparse
-# Esto es para agregar al path la ruta de ejecución actual y poder importar respecto a la ruta del proyecto, desde donde se debe ejecutar el código
-sys.path.append(os.getcwd())
-
-
-# 1. Argumentos por linea de comandos ----------------------------------------
-
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    '--periodo', default=f'{params.periodo_YYYYMM}', help='periodo en formato YYYYMM')
-
-try:
-    args = parser.parse_args()
-except argparse.ArgumentTypeError as e:
-    print(f"Invalid argument: {e}")
+def main():
+        
+        
+    # 1. Info ----------------------------------------
 
 
-# 2. Definir extension de ejecutables ----------------------------------------
-
-if params.sistema_operativo == 'Windows':
-    extension_binarios = ".exe"
-else:
-    extension_binarios = ""
+    print(f"---------------------------------- \nComenzando proceso de visualización:\n----------------------------------")
 
 
-# 3. Info ----------------------------------------
-
-print(
-    f"---------------------------------- \nComenzando proceso para periodo: {args.periodo}\n----------------------------------")
+    # 2. Preproceso ----------------------------------------
 
 
-# 4. Preproceso ----------------------------------------
+    a01_preprocessing.preprocess()
 
-os.system(f"python{extension_binarios} preprocessing/a01_preprocessing.py")
+    a02_encoding.encode()
 
-os.system(f"python{extension_binarios} preprocessing/a02_encoding.py")
-
-os.system(f"python{extension_binarios} preprocessing/a03_split_train_test.py")
+    a03_split_train_test.split()
 
 
-# 5. Dashboards and plotting ----------------------------------------
-
-os.system(f"python{extension_binarios} preprocessing/b01_contracts_plots.py")
-
-os.system(f"python{extension_binarios} preprocessing/b02_personal_plots.py")
-
-os.system(f"python{extension_binarios} preprocessing/b03_internet_plots.py")
-
-os.system(f"python{extension_binarios} preprocessing/b04_phone_plots.py")
+    # 3. Dashboards and plotting ----------------------------------------
 
 
-# 6. Modeling creation ----------------------------------------
+    b01_contracts_plots.plot()  
 
-os.system(f"python{extension_binarios} models/c01_model_creation.py")
+    # os.system(f"python{extension_binarios} preprocessing/b02_personal_plots.py")
+
+    # os.system(f"python{extension_binarios} preprocessing/b03_internet_plots.py")
+
+    # os.system(f"python{extension_binarios} preprocessing/b04_phone_plots.py")
+
+
+if __name__ == "__main__":
+    main()

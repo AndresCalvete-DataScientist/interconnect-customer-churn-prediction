@@ -9,7 +9,7 @@ import numpy as np
 custom_colors = ['#5CB85C', '#D9534F']
 
 
-def create_target_balance_barplot(contract, filename):
+def create_target_balance_barplot(contract, filename='target_balance'):
     # Conteo de valores en la columna IsChurn
     churn_counts = contract['IsChurn'].value_counts().sort_index()
 
@@ -30,43 +30,58 @@ def create_target_balance_barplot(contract, filename):
     plt.savefig(f'reports/plots/{filename}.png')
 
 
-def create_churn_by_column_barplot(dataset, column, xlabel, title='', filename='', percentage=False, output: Literal['save', 'return', 'both'] = 'save'):
-    # Agrupar datos por columna y churn, y organizarlos
-    type_vs_churn = dataset.groupby(
-        column)['IsChurn'].value_counts().unstack()
 
-    # Visualización de la distribución de la columna en funcion del abandono
-    ax = type_vs_churn.plot(kind='bar', stacked=True, color=custom_colors)
+def create_churn_by_column_barplot(dataset, column, xlabel, title='', xticks=None,
+                                   filename='', rot=0, percentage=False, output='save', ax=None, fontsize=10):
+    # Agrupar datos por columna y churn
+    type_vs_churn = dataset.groupby(column)['IsChurn'].value_counts().unstack().fillna(0)
 
-    # Añadir etiquetas de porcentaje
+    # Crear figura solo si no se pasa ax
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(10, 6))
+    else:
+        fig = ax.figure  # Para poder guardar luego si es necesario
+
+    # Plot
+    type_vs_churn.plot(kind='bar', stacked=True, color=custom_colors, ax=ax, rot=rot)
+            
+    # Porcentajes
     if percentage:
-        type_vs_churn_percentage = dataset.groupby(
-            column)['IsChurn'].value_counts(normalize=True).unstack().round(2)
-
+        type_vs_churn_percentage = dataset.groupby(column)['IsChurn'].value_counts(normalize=True).unstack().round(2)
         for i, array in enumerate(type_vs_churn.values):
             for j, value in enumerate(array):
-                ax.text(i + 0.34, np.cumsum(array)[
-                        j], f'{100*type_vs_churn_percentage.values[i, j]:.0f}%', ha='center', va='bottom', weight='bold')
+                if value > np.sum(type_vs_churn, axis=1).max()*0.05:
+                    ax.text(i, np.cumsum(array)[j] - (value/2),
+                            f'{100*type_vs_churn_percentage.values[i, j]:.0f}%',
+                            ha='center', va='center', fontsize=fontsize, color='white', fontweight='bold')
 
     # Etiquetas y título
-    plt.xlabel(xlabel)
-    plt.ylabel('Cantidad de clientes')
-    plt.title(title, pad=20)
-    plt.legend(title='Estado del cliente', labels=['Permanece', 'Abandonó'])
-    plt.xticks(rotation=45)
-    plt.grid(axis='y', alpha=0.5)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel('Cantidad de clientes')
+    ax.set_title(title, pad=20)
+    ax.legend(title='Estado del cliente', labels=['Permanece', 'Abandonó'])
+    ax.grid(axis='y', alpha=0.5)
+    
+    # Cambiar etiquetas del eje x si se pasa xticks
+    if xticks is not None:
+        if len(xticks) != len(type_vs_churn.index):
+            raise ValueError("La longitud de xticks no coincide con la cantidad de categorías")
+        ax.set_xticklabels(xticks)
 
-    if output == 'save' | output == 'both':
+    plt.tight_layout()
+
+    # Guardar figura solo si se creó figura nueva o se indica output
+    if output in ['save', 'both']:
         if filename == '':
-            plt.savefig(f'reports/plots/churn_vs_{column}.png')
+            fig.savefig(f'reports/plots/churn_vs_{column}.png')
         else:
-            plt.savefig(f'reports/plots/{filename}.png')
+            fig.savefig(f'reports/plots/{filename}.png')
 
-    if output == 'return' | output == 'both':
-        return ax
+    return ax
 
 
-def create_churn_by_column_distribution_dashboard(dataset, column, xlabel, title, filename):
+
+def create_churn_by_column_distribution_dashboard(dataset, column, xlabel, title, filename=''):
     # Visualización de la distribución de los cargos en funcion del abandono
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
@@ -89,30 +104,17 @@ def create_churn_by_column_distribution_dashboard(dataset, column, xlabel, title
     axes[1].set_ylabel(xlabel)
     axes[1].set_xticks([0, 1])
     axes[1].set_xticklabels(['Permanencia', 'Abandono'])
-
     axes[1].grid(axis='y', alpha=0.5)
 
     # Título
-    fig.suptitle(title, fontsize=16, y=1)
-    plt.tight_layout()
-    plt.savefig(f'reports/plots/{filename}.png')
+    fig.suptitle(title, fontsize=16)
+    plt.tight_layout()    
+    
+    if filename == '':
+        plt.savefig(f'reports/plots/churn_vs_{column}.png')
+    else:
+        plt.savefig(f'reports/plots/{filename}.png')
 
-
-def create_time_before_churn_distribution_dashboard(dataset, filename):
-    # Calcula la duración en meses antes del abandono
-    def diff_months(row):
-        if pd.notnull(row['EndDate']) and pd.notnull(row['BeginDate']):
-            end = row['EndDate']
-            begin = row['BeginDate']
-            return (end.year - begin.year) * 12 + (end.month - begin.month)
-        else:
-            return np.nan
-
-    # Aplica la función para calcular la duración en meses
-    dataset['DurationMonths'] = dataset.apply(diff_months, axis=1)
-
-    create_churn_by_column_distribution_dashboard(
-        dataset, 'DurationMonths', 'Meses de permanencia antes del abandono', 'Permanencia de clientes antes del abandono', filename)
 
 
 def create_clients_events_timeline_dashboard(dataset, filename):
@@ -187,31 +189,24 @@ def create_client_flow_lineplot(dataset, filename):
 
 
 def create_churn_by_year_month_barplots(dataset, filename):
-    # Agrupar datos por año y mes de subscripción y churn, y organizarlos
-    month_vs_churn = dataset.groupby(
-        'BeginMonth')['IsChurn'].value_counts().unstack()
-    month_vs_churn_percentage = dataset.groupby(
-        'BeginMonth')['IsChurn'].value_counts(normalize=True).unstack().round(2)
-
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
-    axes[0] = create_churn_by_column_barplot(
-        dataset, 'BeginYear', 'Año de subscripción', 'Año de suscripción en funcion del abandono', output='return')
-
-    # Visualización de la distribución de la variable BeginMonth en funcion del abandono
-    month_vs_churn.plot(kind='bar', stacked=True,
-                        color=custom_colors, ax=axes[1], rot=0, legend=False)
-
-    # Etiquetas y título
-    for i, array in enumerate(month_vs_churn.values):
-        for j, value in enumerate(array):
-            axes[1].text(i, np.cumsum(array)[
-                         j], f'{100*month_vs_churn_percentage.values[i, j]:.0f}%', ha='center', va='bottom', fontsize=7)
-
-    axes[1].set_xlabel('Mes de subscripción')
-    axes[1].set_ylabel('Clientes suscritos')
-    axes[1].set_title('Mes de suscripción en funcion del abandono', pad=20)
-    axes[1].grid(axis='y', alpha=0.5)
+    # Año de suscripción
+    create_churn_by_column_barplot(
+        dataset, 'BeginYear', 'Año de subscripción',
+        title='Año de suscripción en función del abandono',
+        percentage=True,
+        fontsize=9,
+        output='return', ax=axes[0])
+    
+    # Mes de suscripción
+    create_churn_by_column_barplot(
+        dataset, 'BeginMonth', 'Mes de subscripción',
+        title='Mes de suscripción en función del abandono',
+        percentage=True,
+        fontsize=7,
+        output='return', ax=axes[1])
 
     plt.tight_layout()
-    plt.savefig(f'reports/plots/{filename}.png')
+    fig.savefig(f'reports/plots/{filename}.png')
+
