@@ -32,10 +32,12 @@ def create_target_balance_barplot(contract, filename='target_balance'):
 
 
 def create_churn_by_column_barplot(dataset, column, xlabel, title='', xticks=None,
-                                   filename='', rot=0, percentage=False, output='save', ax=None, fontsize=10):
+                                   filename='', rot=0, percentage=False, output='save', ax=None, fontsize=10, dropna=True):
     # Agrupar datos por columna y churn
-    type_vs_churn = dataset.groupby(column)['IsChurn'].value_counts().unstack().fillna(0)
-
+    type_vs_churn = dataset.groupby(column, dropna=dropna)['IsChurn'].value_counts().unstack()
+    # if not dropna:
+    #     print(len(type_vs_churn.index))
+    #     print(dataset[dataset[column].isna()])
     # Crear figura solo si no se pasa ax
     if ax is None:
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -47,7 +49,7 @@ def create_churn_by_column_barplot(dataset, column, xlabel, title='', xticks=Non
             
     # Porcentajes
     if percentage:
-        type_vs_churn_percentage = dataset.groupby(column)['IsChurn'].value_counts(normalize=True).unstack().round(2)
+        type_vs_churn_percentage = dataset.groupby(column, dropna=dropna)['IsChurn'].value_counts(normalize=True).unstack().round(2)
         for i, array in enumerate(type_vs_churn.values):
             for j, value in enumerate(array):
                 if value > np.sum(type_vs_churn, axis=1).max()*0.05:

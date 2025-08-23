@@ -11,23 +11,45 @@ def plot():
     df_contract = pd.read_csv("files/datasets/intermediate/a01_contract_cleaned.csv", parse_dates=['BeginDate', 'EndDate'])
 
 
-    # 2. Plotting and save
+    # 2. Plotting and save ----------------------------------------  
 
 
     # Crear plot de balance del objetivo
     create_target_balance_barplot(df_contract)
     
+   
+    # Crear barplots dashboard
+    fig, axes = plt.subplots(1, 3, figsize=(16, 6))    
+    
+    # Tipo de contrato
+    create_churn_by_column_barplot(
+        df_contract, 'Type', '',
+        title='Tipo de contrato en función del abandono',         
+        rot=45, 
+        percentage=True, 
+        output='return', ax=axes[0])
+    
+    # Método de pago
+    create_churn_by_column_barplot(
+        df_contract, 'PaymentMethod', '',
+        title='Método de pago en función del abandono',         
+        rot=45, 
+        percentage=True, 
+        output='return', ax=axes[1])
+    
+    # Tipo de facturación
+    create_churn_by_column_barplot(
+        df_contract, 'PaperlessBilling', '',
+        title='Tipo de facturación en función del abandono',         
+        rot=45, 
+        xticks=['Normal', 'Electrónica'],
+        percentage=True, 
+        output='return', ax=axes[2])
 
-    # Crear bar plots
-    create_churn_by_column_barplot(df_contract, 'Type', 'Tipo de contrato',
-                                title='Tipo de contrato en función del abandono', filename='contract_type_vs_churn', rot=45, percentage=True)
-
-    create_churn_by_column_barplot(df_contract, 'PaymentMethod', 'Método de pago',
-                                title='Método de pago en función del abandono', filename='payment_method_vs_churn', rot=45, percentage=True)
-
-    create_churn_by_column_barplot(df_contract, 'PaperlessBilling', 'Tipo de facturación',
-                                title='Tipo de facturación en función del abandono', xticks=['Normal', 'Electrónica'], filename='billing_vs_churn', rot=45, percentage=True)
-
+    plt.tight_layout()
+    fig.savefig(f'reports/plots/contract_data_dashboard.png')
+    
+    # Año y mes de abandono
     create_churn_by_year_month_barplots(
         df_contract, filename='year_and_month_vs_churn')
     
@@ -49,7 +71,7 @@ def plot():
 
     create_client_flow_lineplot(df_contract, filename='clients_flow')
     
-    print("📊 Visualizaciones de clientes creadas.")
+    print("📊 Visualizaciones de datos de contratos creadas.")
 
 
 if __name__ == "__main__":
