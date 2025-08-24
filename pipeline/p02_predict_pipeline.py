@@ -1,36 +1,30 @@
-# Librerias ----------------------------------------
-
-import params as params
-import os
-import sys
-import argparse
-# Esto es para agregar al path la ruta de ejecución actual y poder importar respecto a la ruta del proyecto, desde donde se debe ejecutar el código
-sys.path.append(os.getcwd())
+from preprocessing import a01_preprocessing, a02_encoding, a03_split_train_test
+from execution import d01_ejecucion_de_modelo
 
 
-# 1. Definir extension de ejecutables ----------------------------------------
-
-if params.sistema_operativo == 'Windows':
-    extension_binarios = ".exe"
-else:
-    extension_binarios = ""
+def main():
 
 
-# 2. Info ----------------------------------------
+    # 1. Info ----------------------------------------
 
-print(
-    f"---------------------------------- \nComenzando proceso de predicción:\n----------------------------------")
-
-
-# 3. Preproceso ----------------------------------------
-
-os.system(f"python{extension_binarios} preprocessing/a01_preprocessing.py")
-
-os.system(f"python{extension_binarios} preprocessing/a02_encoding.py")
-
-os.system(f"python{extension_binarios} preprocessing/a03_split_train_test.py")
+    print(f"---------------------------------- \nComenzando proceso de predicción:\n----------------------------------")
 
 
-# 4. Modeling creation ----------------------------------------
+    # 2. Preprocess ----------------------------------------
 
-os.system(f"python{extension_binarios} models/c01_model_creation.py")
+
+    a01_preprocessing.preprocess(training=False)
+
+    a02_encoding.encode(balance_target=False)
+
+    a03_split_train_test.split(training=False)
+
+
+    # 3. Model prediction ----------------------------------------
+
+
+    d01_ejecucion_de_modelo.predict(training=False)
+    
+
+if __name__ == "__main__":
+    main()

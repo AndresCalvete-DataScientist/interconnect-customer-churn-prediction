@@ -1,5 +1,5 @@
 import argparse
-from pipeline import p01_train_pipeline, p03_analysis_pipeline
+from pipeline import p01_train_pipeline, p02_predict_pipeline, p03_analysis_pipeline
 
 parser = argparse.ArgumentParser(description="Ejecutor de pipelines del proyecto")
 parser.add_argument(
@@ -12,10 +12,8 @@ args = parser.parse_args()
 
 for pl in args.pipelines:
     if pl == "p01":
-        p01_train_pipeline.main()
-        pass
+        p01_train_pipeline.main()        
     elif pl == "p02":
-        #p02_predict_pipeline.main()
-        pass
+        p02_predict_pipeline.main()
     elif pl == "p03":
         p03_analysis_pipeline.main()

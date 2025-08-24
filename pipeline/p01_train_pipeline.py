@@ -1,5 +1,6 @@
 from preprocessing import a01_preprocessing, a02_encoding, a03_split_train_test
 from models import c01_model_creation, c02_model_evaluation
+from execution import d01_ejecucion_de_modelo
 
 
 def main():
@@ -11,7 +12,7 @@ def main():
     print(f"---------------------------------- \nComenzando proceso de entrenamiento del modelo:\n----------------------------------")
 
 
-    # 2. Preproceso ----------------------------------------
+    # 2. Preprocess ----------------------------------------
 
 
     a01_preprocessing.preprocess()
@@ -28,10 +29,16 @@ def main():
     c01_model_creation.create_XGBoost_fixed_model(threshold=0.4)
     
     
-    # 4. Model evaluation----------------------------------------
+    # 4. Model evaluation ----------------------------------------
 
 
     c02_model_evaluation.evaluate()
+    
+    
+    # 5. Test evaluation ----------------------------------------
+    
+    
+    d01_ejecucion_de_modelo.predict()
 
 
 if __name__ == "__main__":

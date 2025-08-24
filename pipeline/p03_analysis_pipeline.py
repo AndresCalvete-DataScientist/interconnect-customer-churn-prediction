@@ -11,7 +11,7 @@ def main():
     print(f"---------------------------------- \nComenzando proceso de análisis de datos:\n----------------------------------")
 
 
-    # 2. Preproceso ----------------------------------------
+    # 2. Preprocess ----------------------------------------
 
 
     a01_preprocessing.preprocess()

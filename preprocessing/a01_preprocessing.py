@@ -3,7 +3,7 @@ import numpy as np
 from functions.categoric_to_numeric_bool import categoric_to_numeric_bool
 
 
-def preprocess():
+def preprocess(training=True):
     
     
     # 1. Loading data ----------------------------------------
@@ -26,13 +26,14 @@ def preprocess():
         # Cambio de tipo de datos de la columna 'BeginDate' a datetime
         dataset['BeginDate'] = pd.to_datetime(dataset['BeginDate']).dt.date
 
-        # Creación de la columna 'IsChurned'
-        dataset['IsChurn'] = dataset['EndDate'].map(
-            lambda x: 1 if x != 'No' else 0)
+        if training:
+            # Creación de la columna 'IsChurned'
+            dataset['IsChurn'] = dataset['EndDate'].map(
+                lambda x: 1 if x != 'No' else 0)
 
-        # Cambio de tipo de datos de la columna 'EndDate' a datetime
-        dataset['EndDate'] = pd.to_datetime(
-            dataset['EndDate'], format='%Y-%m-%d %H:%M:%S', errors='coerce').dt.date
+            # Cambio de tipo de datos de la columna 'EndDate' a datetime
+            dataset['EndDate'] = pd.to_datetime(
+                dataset['EndDate'], format='%Y-%m-%d %H:%M:%S', errors='coerce').dt.date
 
         # Conversión de columna categórica PaperlessBilling a numérica booleana
         dataset['PaperlessBilling'] = categoric_to_numeric_bool(
@@ -101,9 +102,10 @@ def preprocess():
 
     # Creamos las columnas de año y mes de inscripción
     df_contract = create_begin_year_month_column(df_contract)
-
-    # Aplica la función para calcular la duración en meses
-    df_contract['DurationMonths'] = df_contract.apply(diff_months, axis=1)
+    
+    if training:
+        # Aplica la función para calcular la duración en meses
+        df_contract['DurationMonths'] = df_contract.apply(diff_months, axis=1)
 
     # Configuramos una tabla con todos los servicios
     df_con_int = df_contract.merge(df_internet, how='left', on='customerID')
@@ -124,35 +126,37 @@ def preprocess():
         axis=1).astype(int)
 
     # Selección de características y objetivos
+    data_columns = [
+        df_contract[[
+            'customerID',
+            'BeginYear',
+            'BeginMonth',
+            'Type',
+            'PaperlessBilling',
+            'PaymentMethod',
+            'MonthlyCharges',
+            'TotalCharges',
+        ]],
+        df_personal[[
+            'SeniorCitizen',
+            'Partner',
+            'Dependents'
+        ]],
+        df_con_int_pho[[
+            'InternetService',
+            'OnlineSecurity',
+            'OnlineBackup',
+            'DeviceProtection',
+            'TechSupport',
+            'AllServicesCount'
+        ]]
+    ]
+    
+    if training:
+        data_columns.append(df_contract[['IsChurn']])
+    
     data = pd.concat(
-        [
-            df_contract[[
-                'customerID',
-                'BeginYear',
-                'BeginMonth',
-                'Type',
-                'PaperlessBilling',
-                'PaymentMethod',
-                'MonthlyCharges',
-                'TotalCharges',
-            ]],
-            df_personal[[
-                'SeniorCitizen',
-                'Partner',
-                'Dependents'
-            ]],
-            df_con_int_pho[[
-                'InternetService',
-                'OnlineSecurity',
-                'OnlineBackup',
-                'DeviceProtection',
-                'TechSupport',
-                'AllServicesCount'
-            ]],
-            df_contract[[
-                'IsChurn'
-            ]]
-        ],
+        data_columns,
         axis=1
     )
 
