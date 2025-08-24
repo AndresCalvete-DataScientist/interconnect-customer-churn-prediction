@@ -3,7 +3,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OrdinalEncoder
 
 
-def encode():
+def encode(balance_target=True):
 
 
     # 1. Loading data ----------------------------------------
@@ -12,26 +12,27 @@ def encode():
     data = pd.read_csv("files/datasets/intermediate/a01_data_cleaned.csv")
 
 
-    # 2. Data balance ----------------------------------------
+    # 2. Data balancing ----------------------------------------
+    
+    
+    if balance_target:
+        # Identificamos las observaciones de clase 1 y clase 0
+        one_class = data[data['IsChurn'] == 1]
+        zero_class = data[data['IsChurn'] == 0]
 
+        # Contamos la diferencia de cantidades entre una clase y otra
+        difference = zero_class['IsChurn'].count() - one_class['IsChurn'].count()
 
-    # Identificamos las observaciones de clase 1 y clase 0
-    one_class = data[data['IsChurn'] == 1]
-    zero_class = data[data['IsChurn'] == 0]
+        # Aplicamos sobremuestreo con reemplazo de la clase 1 aumentando la mitad de la diferencia
+        new_ones = one_class.sample(difference//2, replace=True, random_state=12345)
 
-    # Contamos la diferencia de cantidades entre una clase y otra
-    difference = zero_class['IsChurn'].count() - one_class['IsChurn'].count()
+        # Aplicamos submuestreo de la clase 0 reduciendo la mitad de la diferencia
+        new_zeros = zero_class.sample(
+            len(zero_class)-(difference//2), replace=False, random_state=12345)
 
-    # Aplicamos sobremuestreo con reemplazo de la clase 1 aumentando la mitad de la diferencia
-    new_ones = one_class.sample(difference//2, replace=True, random_state=12345)
-
-    # Aplicamos submuestreo de la clase 0 reduciendo la mitad de la diferencia
-    new_zeros = zero_class.sample(
-        len(zero_class)-(difference//2), replace=False, random_state=12345)
-
-    data = pd.concat([one_class, new_ones, new_zeros])
-    data = data.sample(frac=1, replace=False,
-                    random_state=12345, ignore_index=True)
+        data = pd.concat([one_class, new_ones, new_zeros])
+        data = data.sample(frac=1, replace=False,
+                        random_state=12345, ignore_index=True)
 
 
     # 3. Scaling data ----------------------------------------

@@ -36,21 +36,21 @@ def split():
 
 
     info_train.to_csv(
-        "files/datasets/intermediate/a03_info_train.csv", index=False)
+        "files/datasets/training/a03_info_train.csv", index=False)
     info_test.to_csv(
-        "files/datasets/intermediate/a03_info_test.csv", index=False)
+        "files/datasets/testing/a03_info_test.csv", index=False)
     ordinal_features_train.to_csv(
-        "files/datasets/intermediate/a03_ordinal_features_train.csv", index=False)
+        "files/datasets/training/a03_ordinal_features_train.csv", index=False)
     ordinal_features_test.to_csv(
-        "files/datasets/intermediate/a03_ordinal_features_test.csv", index=False)
+        "files/datasets/testing/a03_ordinal_features_test.csv", index=False)
     ohe_features_train.to_csv(
-        "files/datasets/intermediate/a03_ohe_features_train.csv", index=False)
+        "files/datasets/training/a03_ohe_features_train.csv", index=False)
     ohe_features_test.to_csv(
-        "files/datasets/intermediate/a03_ohe_features_test.csv", index=False)
+        "files/datasets/testing/a03_ohe_features_test.csv", index=False)
     target_train.to_csv(
-        "files/datasets/intermediate/a03_target_train.csv", index=False)
+        "files/datasets/training/a03_target_train.csv", index=False)
     target_test.to_csv(
-        "files/datasets/intermediate/a03_target_test.csv", index=False)
+        "files/datasets/testing/a03_target_test.csv", index=False)
     
     print("✅ Segmentación finalizada.")
 

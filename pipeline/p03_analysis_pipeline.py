@@ -1,4 +1,4 @@
-from preprocessing import a01_preprocessing, a02_encoding, a03_split_train_test
+from preprocessing import a01_preprocessing
 from insights import b01_contracts_plots, b02_personal_plots, b03_internet_plots, b04_phone_plots, b05_services_plots
 
 
@@ -15,10 +15,6 @@ def main():
 
 
     a01_preprocessing.preprocess()
-
-    a02_encoding.encode()
-
-    a03_split_train_test.split()
 
 
     # 3. Dashboards and plotting ----------------------------------------

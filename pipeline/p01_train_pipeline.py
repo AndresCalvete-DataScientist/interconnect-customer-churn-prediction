@@ -1,35 +1,38 @@
-# Librerias ----------------------------------------
-
-import params as params
-import os
-import sys
-import argparse
-# Esto es para agregar al path la ruta de ejecución actual y poder importar respecto a la ruta del proyecto, desde donde se debe ejecutar el código
-sys.path.append(os.getcwd())
+from preprocessing import a01_preprocessing, a02_encoding, a03_split_train_test
+from models import c01_model_creation, c02_model_evaluation
 
 
-# 1. Definir extension de ejecutables ----------------------------------------
-
-if params.sistema_operativo == 'Windows':
-    extension_binarios = ".exe"
-else:
-    extension_binarios = ""
+def main():
+        
+        
+    # 1. Info ----------------------------------------
 
 
-# 2. Info ----------------------------------------
-
-print(
-    f"---------------------------------- \nComenzando proceso para entrenamiento:\n----------------------------------")
+    print(f"---------------------------------- \nComenzando proceso de entrenamiento del modelo:\n----------------------------------")
 
 
-# 3. Preproceso ----------------------------------------
+    # 2. Preproceso ----------------------------------------
 
-os.system(f"python{extension_binarios} preprocessing/a01_preprocessing.py")
 
-os.system(f"python{extension_binarios} preprocessing/a02_encoding.py")
+    a01_preprocessing.preprocess()
 
-os.system(f"python{extension_binarios} preprocessing/a03_split_train_test.py")
+    a02_encoding.encode()
 
-# 4. Modeling creation ----------------------------------------
+    a03_split_train_test.split()
 
-os.system(f"python{extension_binarios} models/c01_model_creation.py")
+
+    # 3. Modeling creation ----------------------------------------
+
+
+    #! Seleccionar el modelo elegido y su umbral
+    c01_model_creation.create_XGBoost_fixed_model(threshold=0.4)
+    
+    
+    # 4. Model evaluation----------------------------------------
+
+
+    c02_model_evaluation.evaluate()
+
+
+if __name__ == "__main__":
+    main()
