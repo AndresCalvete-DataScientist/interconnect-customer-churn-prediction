@@ -14,12 +14,13 @@ El objetivo es analizar los datos de los clientes y entrenar un modelo de machin
 - Entrenar, validar y comparar diferentes modelos predictivos.
 - Seleccionar el modelo más robusto con base en métricas de evaluación.
 - Proveer conclusiones prácticas que apoyen la toma de decisiones.
-- Crear un flujo de datos (pipeline) para la ingesta de datos y retorno de resultados.
+- Crear un flujo de datos (pipeline) para la ingesta de datos y retorno de predicciones.
 
 ---
 
 ## 📂 Estructura del repositorio
 
+```bash
 interconnect-customer-churn-prediction/
 │── execution/           # Scripts para la predicción con el modelo entrenado (producción y entrenamiento).
 │── files/               # Carpeta reservada para datasets, modelos entrenados y resultados de análisis de modelos.
@@ -33,6 +34,7 @@ interconnect-customer-churn-prediction/
 │── README.md            # Documentación principal del proyecto
 │── requirements.txt     # Librerías necesarias
 │── run.py               # Script principal para la ejecución del proyecto a modo de pipelines.
+```
 
 ---
 
@@ -56,12 +58,12 @@ pip install -r requirements.txt
 
 Este modo permite revisar el proyecto desde un Jupyter Notebook. Es una forma más sencilla y amigable con el usuario. Para esto, una vez instalados los requisitos se puede acceder a la carpeta `notebooks` e ir ejecutando las celdas en orden del archivo `eda.ipynb`.
 
-En este documento se encontrará una guía paso a paso y explicaciones de las decisiones tomadas para el desarrollo de la solución. Es el método recomendado para reconocer la arquitectura completa del proyecto.
+En tal documento se encontrará una guía paso a paso y explicaciones de las decisiones tomadas para el desarrollo de la solución. Es el método recomendado para reconocer la arquitectura completa del proyecto.
 
 
 ### Modo producción
 
-1. Colocar los datasets en la carpeta files/dataset/input.
+1. Colocar los datasets en la carpeta `files/datasets/input`.
 
 2. Abrir la consola en la carpeta raiz.
 
@@ -74,16 +76,16 @@ En este documento se encontrará una guía paso a paso y explicaciones de las de
     ``` bash 
     python run.py p02
     ```
-    - Análisis de los datos insertados (producción): 
+    - Análisis de los datos insertados (exploración): 
     ``` bash 
     python run.py p03
     ```
 
-4. Una vez finalizado el proceso revisar la carpeta files/datasets/output para visualizar los resultados de predicciones por cliente. (Resultado del Pipeline 01 y 02)
+4. Una vez finalizado el proceso revisar la carpeta `files/datasets/output` para visualizar los resultados de predicciones por cliente. **(Resultado del Pipeline 01 y 02)**
 
-5. Examinar las métricas y gráficas de desempeño en las carpeta files/modeling_output. (Resultado del Pipeline 01)
+5. Examinar las métricas y gráficas de desempeño en las carpeta `files/modeling_output`. **(Resultado del Pipeline 01)**
 
-6. Revisar las visualizaciones generadas en la carpeta reports/plots/. (Resultado del Pipeline 03)
+6. Revisar las visualizaciones generadas en la carpeta `reports/plots/`. **(Resultado del Pipeline 03)**
 
 *Nota: es posible especificar el modelo que se quiere poner a prueba en el archivo pipeline/p01_train_pipeline.py al cambiar la función del paso 3 (3. Modeling creation). Para un modelo de regresión logística usar `create_logistic_regression_model()`, para un random forest usar `create_random_forest_classifier()`  y para un XGBoost usar `create_XGBoost_fixed_model()`. A cada cual se le puede ajustar el umbral de clasificación deseado en el parámetro `threshold`.*
 
@@ -115,7 +117,7 @@ En este documento se encontrará una guía paso a paso y explicaciones de las de
 
 - Se implementaron tres pipelines de entrenamiento, predicción y análisis con dashboards.
 
-- El mejor modelo (XGBoost) alcanzó una exactitud de ~0.83, con un Recall de ~0.92, al utilizar un umbralde 0.4.
+- El mejor modelo (**XGBoost**) alcanzó una exactitud de ~0.83, con un **recall de ~0.92**, al utilizar un umbral de 0.4.
 
 ![image](https://raw.githubusercontent.com/AndresCalvete-DataScientist/interconnect-customer-churn-prediction/main/files/modeling_output/figures/XGBClassifier_test.png) 
 
