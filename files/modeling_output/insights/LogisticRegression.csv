@@ -1,8 +1,0 @@
-,train,valid
-Threshold,0.35,0.33
-Accuracy,0.76,0.76
-Recall,0.8,0.79
-F1,0.77,0.76
-F2,0.79,0.78
-APS,0.82,0.82
-ROC AUC,0.84,0.84
