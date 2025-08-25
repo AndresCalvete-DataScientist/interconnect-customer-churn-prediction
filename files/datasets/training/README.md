@@ -1,0 +1,1 @@
+Carpeta para almacenar los datos de entrenamiento en el proceso de entrenamiento.

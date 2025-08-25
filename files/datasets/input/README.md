@@ -1,0 +1,1 @@
+Carpeta para subir los conjuntos de entrenamiento o datos para producción (predicciones)

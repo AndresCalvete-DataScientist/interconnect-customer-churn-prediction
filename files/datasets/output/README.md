@@ -1,0 +1,1 @@
+Carpeta para almacenar los resultados de predicción en producción.

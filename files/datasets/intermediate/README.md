@@ -1,0 +1,1 @@
+Carpeta para almacenar archivos intermedios o transitorios del preprocesamiento y la codificación.
